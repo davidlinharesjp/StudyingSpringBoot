@@ -1,13 +1,16 @@
 package com.davidlinhares.springApplication.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
@@ -15,33 +18,39 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "tb_user")
 @SequenceGenerator(name = "sq_user", sequenceName = "sq_user", initialValue = 1, allocationSize = 1)
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@GeneratedValue( strategy = GenerationType.SEQUENCE, generator = "sq_user")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sq_user")
 	@Column(name = "id_user", nullable = false)
 	private Long id;
-	
+
 	@Column(name = "nm_user", nullable = true, length = 100)
 	private String name;
-	
-	@Column(name = "nm_email", nullable = true, length =  100)
+
+	@Column(name = "nm_email", nullable = true, length = 100)
 	private String email;
-	
-	@Column(name = "nu_phone", nullable = true,length = 50)
+
+	@Column(name = "nu_phone", nullable = true, length = 50)
 	private String phone;
-	
+
 	@Column(name = "key_pass", nullable = true, length = 20)
 	private String password;
-	
+
 	@Column(name = "ts_last_update", insertable = true, updatable = true)
 	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date lastUpdate;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "user")
+	private List<Order> orders = new ArrayList<>();
 
 	public User() {
 		super();
@@ -55,12 +64,12 @@ public class User implements Serializable {
 		this.phone = phone;
 		this.password = password;
 	}
-	
+
 	@PreUpdate
 	public void onUpdate() {
 		this.lastUpdate = new Date();
 	}
-	
+
 	@PrePersist
 	public void onInsert() {
 		this.lastUpdate = new Date();
@@ -106,12 +115,8 @@ public class User implements Serializable {
 		this.password = password;
 	}
 
-	public Date getLastUpdate() {
-		return lastUpdate;
-	}
-
-	public void setLastUpdate(Date lastUpdate) {
-		this.lastUpdate = lastUpdate;
+	public List<Order> getOrders() {
+		return orders;
 	}
 
 	@Override
@@ -161,6 +166,12 @@ public class User implements Serializable {
 		} else if (!phone.equals(other.phone))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", name=" + name + ", email=" + email + ", phone=" + phone + ", password=" + password
+				+ "]";
 	}
 
 }
