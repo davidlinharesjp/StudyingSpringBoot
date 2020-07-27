@@ -52,7 +52,7 @@ public class Order implements Serializable {
 	private Integer orderStatus;
 	
 	@OneToMany(mappedBy = "id.order")
-	private Set<OrderItem> orderItems = new HashSet<>();
+	private Set<OrderItem> items = new HashSet<>();
 
 	public Order() {
 		super();
@@ -114,8 +114,8 @@ public class Order implements Serializable {
 		}
 	}
 	
-	public Set<OrderItem> getOrderItem(){
-		return orderItems;
+	public Set<OrderItem> getItems(){
+		return items;
 	}
 
 	@Override
