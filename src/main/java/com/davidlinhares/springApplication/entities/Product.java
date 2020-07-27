@@ -13,13 +13,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "tb_product")
@@ -52,6 +54,9 @@ public class Product implements Serializable {
 	@Column(name = "ts_last_update", insertable = true, updatable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastUpdate;
+	
+	@OneToMany(mappedBy = "id.product")
+	private Set<OrderItem> items = new HashSet<>();
 
 	@PreUpdate
 	public void onUpdate() {
@@ -122,6 +127,15 @@ public class Product implements Serializable {
 
 	public Set<Category> getCategories() {
 		return categories;
+	}
+	
+	@JsonIgnore
+	public Set<Order> getOrders(){
+		Set<Order> set = new HashSet<>();
+		for (OrderItem item: items) {
+			set.add(item.getOrder());
+		}
+		return set;
 	}
 
 	@Override
