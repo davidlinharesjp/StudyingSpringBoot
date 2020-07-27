@@ -3,6 +3,8 @@ package com.davidlinhares.springApplication.entities;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
@@ -18,6 +21,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.davidlinhares.springApplication.entities.enumeration.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
@@ -43,16 +47,23 @@ public class Order implements Serializable {
 	@Column(name= "ts_last_update", insertable = true, updatable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastUpdate;
+	
+	@Column(name = "en_order_status")
+	private Integer orderStatus;
+	
+	@OneToMany(mappedBy = "id.order")
+	private Set<OrderItem> orderItems = new HashSet<>();
 
 	public Order() {
 		super();
 	}
 
-	public Order(Long id, Instant moment, User user) {
+	public Order(Long id, Instant moment, User user, OrderStatus orderStatus) {
 		super();
 		this.id = id;
 		this.moment = moment;
 		this.user = user;
+		setOrderStatus(orderStatus);
 	}
 
 	public Long getId() {
@@ -87,6 +98,24 @@ public class Order implements Serializable {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+	
+
+	public OrderStatus getOrderStatus() {
+		if(orderStatus != null) {
+			return OrderStatus.valueOf(orderStatus);			
+		}
+		return null;
+	}
+
+	public void setOrderStatus(OrderStatus orderStatus) {
+		if(orderStatus != null ) {			
+			this.orderStatus = orderStatus.getCode();
+		}
+	}
+	
+	public Set<OrderItem> getOrderItem(){
+		return orderItems;
 	}
 
 	@Override
