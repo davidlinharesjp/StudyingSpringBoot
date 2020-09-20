@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
@@ -30,29 +32,32 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 public class Order implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(generator = "sq_order", strategy = GenerationType.AUTO)
-	@Column(name= "id_order", nullable = false)
+	@Column(name = "id_order", nullable = false)
 	private Long id;
-	
-	@Column(name="dt_moment")
+
+	@Column(name = "dt_moment")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
 	private Instant moment;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "fk_user", referencedColumnName = "id_user")
 	private User user;
-	
-	@Column(name= "ts_last_update", insertable = true, updatable = true)
+
+	@Column(name = "ts_last_update", insertable = true, updatable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastUpdate;
-	
+
 	@Column(name = "en_order_status")
 	private Integer orderStatus;
-	
+
 	@OneToMany(mappedBy = "id.order")
 	private Set<OrderItem> items = new HashSet<>();
+
+	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+	private Payment payment;
 
 	public Order() {
 		super();
@@ -69,7 +74,7 @@ public class Order implements Serializable {
 	public Long getId() {
 		return id;
 	}
-	
+
 	@PreUpdate
 	public void onUpdate() {
 		this.lastUpdate = new Date();
@@ -79,7 +84,7 @@ public class Order implements Serializable {
 	public void onInsert() {
 		this.lastUpdate = new Date();
 	}
-	
+
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -99,23 +104,35 @@ public class Order implements Serializable {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
 
 	public OrderStatus getOrderStatus() {
-		if(orderStatus != null) {
-			return OrderStatus.valueOf(orderStatus);			
+		if (orderStatus != null) {
+			return OrderStatus.valueOf(orderStatus);
 		}
 		return null;
 	}
 
 	public void setOrderStatus(OrderStatus orderStatus) {
-		if(orderStatus != null ) {			
+		if (orderStatus != null) {
 			this.orderStatus = orderStatus.getCode();
 		}
 	}
-	
-	public Set<OrderItem> getItems(){
+
+	public Set<OrderItem> getItems() {
 		return items;
+	}
+
+	public Payment getPayment() {
+		return payment;
+	}
+
+	public void setPayment(Payment payment) {
+		this.payment = payment;
+	}
+	
+	public Double getTotal() {
+		Double sum = items.stream().mapToDouble(item -> item.getSubTotal()).sum();
+		return sum;
 	}
 
 	@Override
