@@ -16,6 +16,7 @@ import com.davidlinhares.springApplication.UserRepository;
 import com.davidlinhares.springApplication.entities.Category;
 import com.davidlinhares.springApplication.entities.Order;
 import com.davidlinhares.springApplication.entities.OrderItem;
+import com.davidlinhares.springApplication.entities.Payment;
 import com.davidlinhares.springApplication.entities.Product;
 import com.davidlinhares.springApplication.entities.User;
 import com.davidlinhares.springApplication.entities.enumeration.OrderStatus;
@@ -83,7 +84,10 @@ public class TestConfig implements CommandLineRunner {
 		
 		orderItemRepository.saveAll(Arrays.asList(oi1,oi2,oi3,oi4));
 		
+		Payment pay1 = new Payment(null, Instant.parse("2019-06-20T21:53:07Z"), o1 );
+		o1.setPayment(pay1);
 		
+		orderRepository.save(o1);
 	}
 
 }
